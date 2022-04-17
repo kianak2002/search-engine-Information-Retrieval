@@ -50,7 +50,6 @@ def stem(document):
     text_new = []
     document_new = []
     for text in document:
-        print(len(text))
         for word in text:
             word = stemmer.convert_to_stem(word)
             text_new.append(word)
@@ -74,7 +73,7 @@ def positional_index(document):
                     doc_ID = positional_index_list.get(word)
                     check = False
                     for i in range(1, len(doc_ID)):
-                        if id == doc_ID[i][0]:   # we have the doc id
+                        if id == doc_ID[i][0]:  # we have the doc id
                             count = doc_ID[0]
                             count += 1
                             doc_ID[0] = count
@@ -100,7 +99,23 @@ def positional_index(document):
                     doc_ID.append(count)  # first index of this list is frequency of the word
                     doc_ID.append((id, doc_indexes))
                     positional_index_list[word] = doc_ID
-    print(positional_index_list)
+    return positional_index_list
+
+
+def search_query(positional_index_list):
+    query = input()
+    
+    word = query
+    id_s = []
+    if word not in positional_index_list:
+        print("we have no information for your research")
+    else:
+        doc_ID = positional_index_list.get(word)
+        for i in range(1, len(doc_ID)):
+            id = doc_ID[i][0]
+            id_s.append(id)
+    print(id_s)
+
 
 if __name__ == '__main__':
     doc = read_file()
@@ -108,4 +123,6 @@ if __name__ == '__main__':
     doc = normalize(doc)
     doc = tokenize(doc)
     doc = stem(doc)
-    positional_index(doc)
+    positional_index_list = positional_index(doc)
+    print(positional_index_list)
+    search_query(positional_index_list)
