@@ -75,7 +75,9 @@ def positional_index(document):
                     check = False
                     for i in range(1, len(doc_ID)):
                         if id == doc_ID[i][0]:   # we have the doc id
-
+                            count = doc_ID[0]
+                            count += 1
+                            doc_ID[0] = count
                             doc_indexes = doc_ID[i][1]
                             doc_ID.remove((id, doc_indexes))  # first we delete it to update it
                             doc_indexes.append(index)  # we change the doc index
@@ -83,11 +85,15 @@ def positional_index(document):
                             positional_index_list[word] = doc_ID  # we update the word positional index
                             check = True
                     if not check:  # we dont have the doc id
+                        count = doc_ID[0]
+                        count += 1
+                        doc_ID[0] = count
                         doc_indexes = []
                         doc_indexes.append(index)
                         doc_ID.append((id, doc_indexes))
                         positional_index_list[word] = doc_ID  # update the word positional index
                 else:
+                    count = 1
                     doc_ID = []
                     doc_indexes = []
                     doc_indexes.append(index)
