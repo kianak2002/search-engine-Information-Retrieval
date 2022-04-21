@@ -124,13 +124,20 @@ def search_query(positional_index_list):
     print(query)
     for j in range(len(query)):
         word = query[j]
-        if word[0] == '"':  # for the exact queries     first quotation
+        arr = list(word)
+        if arr[1] == '"':  # for the exact queries     first quotation
             quotation_first = True
-            word = word[1:len(word)]
-        if word[len(word) - 1] == '"':  # for the exact queries      last quotation
+            word = ""
+            arr = arr[3:len(arr)]
+            for element in arr:
+                word += element
+        if arr[len(arr) - 2] == '"':  # for the exact queries      last quotation
             quotation_second = True
-            word = word[0:len(word)-1]
-
+            word = ""
+            arr = arr[0:len(arr)-3]
+            for element in arr:
+                word += element
+        print(word)
         if word in positional_index_list:
             doc_ID = positional_index_list.get(word)
             for i in range(1, len(doc_ID)):
