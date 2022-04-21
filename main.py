@@ -5,6 +5,7 @@ import string
 from parsivar import Normalizer
 from parsivar import Tokenizer
 from parsivar import FindStems
+from collections import Counter
 
 
 def read_file():
@@ -102,19 +103,69 @@ def positional_index(document):
     return positional_index_list
 
 
+'''
+search the query in the positional index list and return the doc id
+if it is just some words it check each of the and return a list of doc id's with the priority of frequency
+'''
+
+
 def search_query(positional_index_list):
+    # query = input().split()  # now query is a list of words searched by user
     query = input()
-    
-    word = query
-    id_s = []
-    if word not in positional_index_list:
-        print("we have no information for your research")
-    else:
-        doc_ID = positional_index_list.get(word)
-        for i in range(1, len(doc_ID)):
-            id = doc_ID[i][0]
-            id_s.append(id)
-    print(id_s)
+    tokenizer = Tokenizer()
+    query = tokenizer.tokenize_words(query)
+    query = normalize(query)
+    query = stem(query)
+
+    quotation_first = False
+    quotation_second = False
+    id_s = []  # we save the doc id having the word and a frequency for the doc id of how many of the words it had
+    id_s_not = []  # save the doc id's for "not" words
+    print(query)
+    for j in range(len(query)):
+        word = query[j]
+        if word[0] == '"':  # for the exact queries     first quotation
+            quotation_first = True
+            word = word[1:len(word)]
+        if word[len(word) - 1] == '"':  # for the exact queries      last quotation
+            quotation_second = True
+            word = word[0:len(word)-1]
+
+        if word in positional_index_list:
+            doc_ID = positional_index_list.get(word)
+            for i in range(1, len(doc_ID)):
+                id = doc_ID[i][0]
+                if j != 0 and query[j - 1] != '!':
+                    id_s.append(id)
+                elif j != 0 and query[j - 1] == '!':
+                    id_s_not.append(id)
+    id_s = sort_doc_id_s(id_s)
+    id_s_not = sort_doc_id_s(id_s_not)
+    list_result = subtract_list(id_s, id_s_not)
+    print(list_result)
+
+
+'''
+in this function we sort the list by its frequency and then remove the duplicates
+'''
+
+
+def sort_doc_id_s(doc_list):
+    doc_list = [key for key, value in Counter(doc_list).most_common()]
+    return doc_list
+
+
+'''
+subtracts one list from the other list
+'''
+
+
+def subtract_list(list_first, list_second):
+    res = []
+    for item in list_first:
+        if item not in list_second:
+            res.append(item)
+    return res
 
 
 if __name__ == '__main__':
