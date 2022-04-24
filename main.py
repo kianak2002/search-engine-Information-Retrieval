@@ -9,7 +9,7 @@ from collections import Counter
 
 def read_file():
     document = []
-    f = open('jsonfile.json', "r")
+    f = open('jsonfile_data.json', "r")
     data = json.loads(f.read())
     for item in data:
         document.append(data[item]['content'])
@@ -18,42 +18,23 @@ def read_file():
 
 
 def delete_punctuation(document):
-    # document_new = []
     punctuations = string.punctuation
     punctuations += "".join(['،', '؟', '؛', '»', '«'])
-    # for text in document:
-    #     text = text.translate(str.maketrans("", "", punctuations))
-    #     document_new.append(text)
     return document.translate(str.maketrans('', '', punctuations))
 
 
 def normalize(document):
-    # document_new = []
-    # normalizer = Normalizer(statistical_space_correction=True)
     normalizer = Normalizer()
-    # for text in document:
-    #     text = normalizer.normalize(text)
-    #     document_new.append(text)
-    #
-    #
-    # return document_new
     return normalizer.normalize(document)
 
 
 def tokenize(document):
-    # document_new = []
-    # tokenizer = Tokenizer()
-    # for text in document:
-    #     words = tokenizer.tokenize_words(text)
-    #     document_new.append(words)
     return word_tokenize(document)
 
 
 def stem(document):
     stemmer = Stemmer()
     return stemmer.stem(document)
-    # stemmer = FindStems()
-    # return stemmer.convert_to_stem(document)
 
 
 '''
@@ -64,10 +45,9 @@ if it is not then we save the docID and its index in it
 
 def positional_index():
     positional_index_list = {}
-    f = open('jsonfile.json', "r")
+    f = open('jsonfile_data.json', "r")
     data = json.loads(f.read())
     for item in data:
-        print(item)
         myContent = data[item]['content']
         myContent = delete_punctuation(myContent)
         myContent = normalize(myContent)
@@ -77,7 +57,6 @@ def positional_index():
             if word not in stopWord:
                 word = stem(word)
                 if word in positional_index_list:  # we have the word in positional index
-                    # print("koft")
                     positional_index_list[word][0] += 1  # for frequency
                     if item in positional_index_list[word][1]:  # we have the doc id
                         positional_index_list[word][1][item].append(position)
@@ -90,43 +69,7 @@ def positional_index():
                     doc_ID[item] = [position]  # position is the index of the word
                     list_doc.append(doc_ID)  # dictionary for ids
                     positional_index_list[word] = list_doc  # dictionary for positional index
-        # for id in range(len(document)):
-        #     for position, word in enumerate(document[id]):
-        #         if word not in stopWord:
-        #
-        #     for index in range(len(document[id])):
-        #         word = document[id][index]
-        #         if word not in stopWord:
-        #             if word in positional_index_list:  # we have the word in positional index
-        #                 doc_ID = positional_index_list.get(word)
-        #                 check = False
-        #                 for i in range(1, len(doc_ID)):
-        #                     if id == doc_ID[i][0]:  # we have the doc id
-        #                         count = doc_ID[0]
-        #                         count += 1
-        #                         doc_ID[0] = count
-        #                         doc_indexes = doc_ID[i][1]
-        #                         doc_ID.remove((id, doc_indexes))  # first we delete it to update it
-        #                         doc_indexes.append(index)  # we change the doc index
-        #                         doc_ID.append((id, doc_indexes))  # update the docID
-        #                         positional_index_list[word] = doc_ID  # we update the word positional index
-        #                         check = True
-        #                 if not check:  # we dont have the doc id
-        #                     count = doc_ID[0]
-        #                     count += 1
-        #                     doc_ID[0] = count
-        #                     doc_indexes = []
-        #                     doc_indexes.append(index)
-        #                     doc_ID.append((id, doc_indexes))
-        #                     positional_index_list[word] = doc_ID  # update the word positional index
-        #             else:
-        #                 count = 1
-        #                 doc_ID = []
-        #                 doc_indexes = []
-        #                 doc_indexes.append(index)
-        #                 doc_ID.append(count)  # first index of this list is frequency of the word
-        #                 doc_ID.append((id, doc_indexes))
-        #                 positional_index_list[word] = doc_ID
+
     return positional_index_list
 
 
@@ -138,12 +81,9 @@ if it is just some words it check each of the and return a list of doc id's with
 
 def search_query(positional_index_list):
     positions = {}
-    # query = input().split()  # now query is a list of words searched by user
+    print("enter your Query :) :")
     query = input()
-    query = word_tokenize(query)
-    # query = tokenizer.tokenize_words(query)
-    # query = normalize(query)
-    # query = stem(query)
+    query = word_tokenize(query) # now query is a list of words searched by user
 
     id_s = []  # we save the doc id having the word and a frequency for the doc id of how many of the words it had
     id_s_not = []  # save the doc id's for "not" words
@@ -165,7 +105,6 @@ def search_query(positional_index_list):
         word = normalize(word)
         word = stem(word)
 
-        # if quotation_first == True and quotation_second == False:
         if word in positional_index_list:
             doc_ID = positional_index_list[word][1]
             positions1 = positions
@@ -228,7 +167,7 @@ we have the doc ids, we get the URL and title
 
 
 def return_URL_title(doc_ids):
-    f = open('jsonfile.json', "r")
+    f = open('jsonfile_data.json', "r")
     data = json.loads(f.read())
     j = []
     urls = []
@@ -246,5 +185,9 @@ if __name__ == '__main__':
     positional_index_list = positional_index()
     doc_ids = search_query(positional_index_list)
     urls, titles, j = return_URL_title(doc_ids)
+    if len(urls) == 0:
+        print("No Result For Your Search! :(")
     for i in range(len(urls)):
         print(i, ')\n', 'doc id:', j[i], '\nURL:\n', urls[i], "\ntitle:\n ", titles[i])
+        if i == 5:
+            exit(0)  # easy easy tamam tamam
