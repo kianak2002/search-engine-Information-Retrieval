@@ -2,9 +2,10 @@ from __future__ import unicode_literals
 from hazm import *
 import json
 import string
-from parsivar import FindStems
 from hazm import Stemmer
 from collections import Counter
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 def read_file():
@@ -54,21 +55,21 @@ def positional_index():
         myContent = tokenize(myContent)
         stopWord = set(stopwords_list())
         for position, word in enumerate(myContent):
-            if word not in stopWord:
-                word = stem(word)
-                if word in positional_index_list:  # we have the word in positional index
-                    positional_index_list[word][0] += 1  # for frequency
-                    if item in positional_index_list[word][1]:  # we have the doc id
-                        positional_index_list[word][1][item].append(position)
-                    else:  # we dont have the doc id
-                        positional_index_list[word][1][item] = [position]
-                else:
-                    list_doc = []
-                    list_doc.append(1)
-                    doc_ID = {}
-                    doc_ID[item] = [position]  # position is the index of the word
-                    list_doc.append(doc_ID)  # dictionary for ids
-                    positional_index_list[word] = list_doc  # dictionary for positional index
+            # if word not in stopWord:
+            word = stem(word)
+            if word in positional_index_list:  # we have the word in positional index
+                positional_index_list[word][0] += 1  # for frequency
+                if item in positional_index_list[word][1]:  # we have the doc id
+                    positional_index_list[word][1][item].append(position)
+                else:  # we dont have the doc id
+                    positional_index_list[word][1][item] = [position]
+            else:
+                list_doc = []
+                list_doc.append(1)
+                doc_ID = {}
+                doc_ID[item] = [position]  # position is the index of the word
+                list_doc.append(doc_ID)  # dictionary for ids
+                positional_index_list[word] = list_doc  # dictionary for positional index
 
     return positional_index_list
 
@@ -83,7 +84,7 @@ def search_query(positional_index_list):
     positions = {}
     print("enter your Query :) :")
     query = input()
-    query = word_tokenize(query) # now query is a list of words searched by user
+    query = word_tokenize(query)  # now query is a list of words searched by user
 
     id_s = []  # we save the doc id having the word and a frequency for the doc id of how many of the words it had
     id_s_not = []  # save the doc id's for "not" words
@@ -117,7 +118,7 @@ def search_query(positional_index_list):
                             positions[id] = doc_ID[id]
                         else:
                             for index in positions1:
-                                if index == id :
+                                if index == id:
                                     for position1 in positions1[index]:
                                         for position2 in doc_ID[id]:
                                             if position2 - 1 == position1:
@@ -181,13 +182,30 @@ def return_URL_title(doc_ids):
     return urls, titles, j
 
 
+def zipf(positional_index_list):
+    frequency = []
+    indexes = []
+    i = 0
+    for word in positional_index_list:
+        i += 1
+        frequency.append(positional_index_list[word][0])
+        indexes.append(i)
+    frequency.sort(reverse=True)
+
+    plt.plot(np.log10(indexes), np.log10(frequency))
+    plt.plot(np.log10(indexes), -1 * np.log10(indexes) + np.log10(frequency[0]))
+    plt.show()
+
+
 if __name__ == '__main__':
     positional_index_list = positional_index()
+    zipf(positional_index_list)
     doc_ids = search_query(positional_index_list)
     urls, titles, j = return_URL_title(doc_ids)
     if len(urls) == 0:
         print("No Result For Your Search! :(")
     for i in range(len(urls)):
-        print(i, ')\n', 'doc id:', j[i], '\nURL:\n', urls[i], "\ntitle:\n ", titles[i])
+        print(i, ')', 'doc id:', j[i], '\nURL:\n', urls[i], "\ntitle:\n ", titles[i])
+        print("***************************************")
         if i == 5:
             exit(0)  # easy easy tamam tamam
