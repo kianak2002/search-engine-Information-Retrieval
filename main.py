@@ -48,6 +48,7 @@ def positional_index():
     positional_index_list = {}
     f = open('jsonfile_data.json', "r")
     data = json.loads(f.read())
+    tf = {}
     for item in data:
         myContent = data[item]['content']
         myContent = delete_punctuation(myContent)
@@ -55,22 +56,32 @@ def positional_index():
         myContent = tokenize(myContent)
         stopWord = set(stopwords_list())
         for position, word in enumerate(myContent):
-            # if word not in stopWord:
-            word = stem(word)
-            if word in positional_index_list:  # we have the word in positional index
-                positional_index_list[word][0] += 1  # for frequency
-                if item in positional_index_list[word][1]:  # we have the doc id
-                    positional_index_list[word][1][item].append(position)
-                else:  # we dont have the doc id
-                    positional_index_list[word][1][item] = [position]
-            else:
-                list_doc = []
-                list_doc.append(1)
-                doc_ID = {}
-                doc_ID[item] = [position]  # position is the index of the word
-                list_doc.append(doc_ID)  # dictionary for ids
-                positional_index_list[word] = list_doc  # dictionary for positional index
+            if word not in stopWord:
+                word = stem(word)
+                if word in positional_index_list:  # we have the word in positional index
+                    positional_index_list[word][0] += 1  # for frequency
+                    if item in positional_index_list[word][1]:  # we have the doc id
+                        positional_index_list[word][1][item].append(position)
+                        tf[word][item] += 1  # term frequency of the item document for the word adds for one
+                    else:  # we dont have the doc id
+                        positional_index_list[word][1][item] = [position]
+                        tf[word]['df'] += 1
+                        tf[word][item] = 1  # doc id first added for the word in term frequency
+                else:
+                    doc_item = {}  # doc ids :)
+                    list_doc = []
+                    list_doc.append(1)
+                    doc_ID = {}
+                    doc_ID[item] = [position]  # position is the index of the word
+                    list_doc.append(doc_ID)  # dictionary for ids
+                    positional_index_list[word] = list_doc  # dictionary for positional index
+                    doc_item[item] = 1  # adds the doc id
+                    tf[word] = {'df': 1}
+                    # tf[word] = doc_item  # worddoc id first added for the word in term frequency
+                    tf[word][item] = 1
 
+
+    print(' ##############  ######################## #############', tf['آسیا'])
     return positional_index_list
 
 
@@ -199,7 +210,8 @@ def zipf(positional_index_list):
 
 if __name__ == '__main__':
     positional_index_list = positional_index()
-    zipf(positional_index_list)
+    # print(positional_index_list)
+    # zipf(positional_index_list)
     doc_ids = search_query(positional_index_list)
     urls, titles, j = return_URL_title(doc_ids)
     if len(urls) == 0:
