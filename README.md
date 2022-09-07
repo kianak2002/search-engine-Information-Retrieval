@@ -4,7 +4,7 @@ Implementing a search engine in three phases.
 1.binary search
 2.ranked search which tf-idf was used
 3.champion list (using 30 best results by tf-idf)
-Also, it plots the zipf and heaps to compares the states before and after omitting the stop-words.
+Also, it plots the zipf and heaps to compare the states before and after omitting the stop-words.
 
 \*Especial point
 All these parts were also implemented with elastic search!
